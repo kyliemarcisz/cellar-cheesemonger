@@ -13,6 +13,8 @@ from fastmcp import Client
 
 import main
 
+EM_DASH = "—"
+
 ROOT = Path(__file__).resolve().parent.parent
 
 
@@ -260,7 +262,7 @@ def test_mcp_server_end_to_end():
 def test_no_em_dashes_anywhere():
     for name in ("main.py", "README.md", "cheeses.json"):
         text = (ROOT / name).read_text(encoding="utf-8")
-        assert "2014" not in text, f"em dash in {name}"
+        assert EM_DASH not in text, f"em dash in {name}"
     outputs = json.dumps([
         main.plan_board(12, 60, "crowd-pleaser", ["blue"], True),
         main.plan_board(10, 5, "adventurous"),
@@ -268,4 +270,4 @@ def test_no_em_dashes_anywhere():
         main.pairings_for("kombucha"),
         main.pick_story(),
     ], ensure_ascii=False)
-    assert "2014" not in outputs
+    assert EM_DASH not in outputs
