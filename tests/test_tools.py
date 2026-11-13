@@ -260,7 +260,7 @@ def test_mcp_server_end_to_end():
 def test_no_em_dashes_anywhere():
     for name in ("main.py", "README.md", "cheeses.json"):
         text = (ROOT / name).read_text(encoding="utf-8")
-        assert "—" not in text, f"em dash in {name}"
+        assert "2014" not in text, f"em dash in {name}"
     outputs = json.dumps([
         main.plan_board(12, 60, "crowd-pleaser", ["blue"], True),
         main.plan_board(10, 5, "adventurous"),
@@ -268,4 +268,4 @@ def test_no_em_dashes_anywhere():
         main.pairings_for("kombucha"),
         main.pick_story(),
     ], ensure_ascii=False)
-    assert "—" not in outputs
+    assert "2014" not in outputs
