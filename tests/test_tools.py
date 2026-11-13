@@ -405,3 +405,20 @@ def test_instructions_carry_exact_pregnancy_note_and_answer_rules():
     assert main.PREGNANCY_NOTE in text
     assert "as returned" in text and "do not change portions" in text
     assert "Never mention the server" in text
+
+
+def test_board_carries_presentation_rules_for_the_model():
+    r = main.plan_board(12, 60, "crowd-pleaser", ["blue cheese"], True)
+    rules = " ".join(r["presentation_rules"])
+    assert "word for word" in rules
+    assert "1.5 oz per guest" in rules and "Do not raise or lower portions" in rules
+    for w in r["wine_picks"]:
+        assert w["name"] in rules
+    # Rules are for the model; customer-facing notes must not contain them.
+    assert not any("presentation" in n or "word for word" in n for n in r["notes"])
+
+
+def test_light_portion_rule_matches_trimmed_board():
+    r = main.plan_board(10, 5, "date-night")
+    assert any("portions" in a for a in r["adjustments"])
+    assert f"{main.LIGHT_OZ_PER_GUEST:g} oz per guest" in " ".join(r["presentation_rules"])
