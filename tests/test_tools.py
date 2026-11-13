@@ -254,7 +254,7 @@ def test_mcp_server_end_to_end():
             assert "cellar://cheeses" in [str(r.uri) for r in resources]
             content = await client.read_resource("cellar://cheeses")
             assert "Lincolnshire Poacher" in content[0].text
-            assert "not affiliated" in (client.instructions or "").lower()
+            assert "not affiliated" in (client.initialize_result.instructions or "").lower()
     asyncio.run(run())
 
 

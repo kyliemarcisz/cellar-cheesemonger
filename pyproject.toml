@@ -5,7 +5,7 @@ description = "Unofficial demo MCP server: The Cellar on the agentic web, built 
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
-    "fastmcp>=4.2.0",
+    "fastmcp>=3.4.11,<4",
 ]
 
 [dependency-groups]
