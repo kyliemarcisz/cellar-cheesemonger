@@ -1,0 +1,18 @@
+[project]
+name = "cellar-cheesemonger"
+version = "0.1.0"
+description = "Unofficial demo MCP server: The Cellar on the agentic web, built by a former cheesemonger."
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "fastmcp>=4.2.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.2.0",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]

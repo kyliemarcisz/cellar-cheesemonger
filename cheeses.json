@@ -1,0 +1,266 @@
+{
+  "_meta": {
+    "description": "Cheese catalog for The Cellar Cheesemonger, an unofficial demo MCP server. Not affiliated with The Cellar.",
+    "schema": {
+      "milk": "cow | goat | sheep | mixed",
+      "style": "fresh | bloomy | washed | semi-soft | semi-firm | hard | blue",
+      "intensity": "1 (mild) to 5 (bold)",
+      "price_tier": "$ | $$ | $$$ (relative only; per-ounce estimates live in the CONFIG block of main.py)",
+      "raw_milk": "true | false | null (null means unsure or varies by producer)"
+    }
+  },
+  "cheeses": [
+    {
+      "id": "lincolnshire-poacher",
+      "name": "Lincolnshire Poacher",
+      "origin": "Lincolnshire, England",
+      "milk": "cow",
+      "style": "hard",
+      "intensity": 3,
+      "flavor_tags": ["nutty", "savory", "fruity", "earthy"],
+      "price_tier": "$$$",
+      "raw_milk": true,
+      "pairs_with": {
+        "wine": ["Cabernet Sauvignon", "Bordeaux blend", "Amontillado Sherry"],
+        "beer": ["IPA", "English bitter", "Hard cider"],
+        "extras": ["apple slices", "chutney", "oatcakes"]
+      },
+      "monger_note": "TODO_KYLIE",
+      "story": "TODO_KYLIE"
+    },
+    {
+      "id": "prima-donna",
+      "name": "Prima Donna",
+      "origin": "Netherlands",
+      "milk": "cow",
+      "style": "hard",
+      "intensity": 3,
+      "flavor_tags": ["caramel", "nutty", "sweet", "crystalline"],
+      "price_tier": "$",
+      "raw_milk": false,
+      "pairs_with": {
+        "wine": ["Zinfandel", "Merlot", "Tawny Port"],
+        "beer": ["IPA", "Amber ale", "Belgian dubbel"],
+        "extras": ["apple slices", "dried apricots", "candied pecans"]
+      },
+      "monger_note": "TODO_KYLIE",
+      "story": "TODO_KYLIE"
+    },
+    {
+      "id": "langres",
+      "name": "Langres",
+      "origin": "Champagne-Ardenne, France",
+      "milk": "cow",
+      "style": "washed",
+      "intensity": 4,
+      "flavor_tags": ["funky", "savory", "creamy", "tangy"],
+      "price_tier": "$$$",
+      "raw_milk": false,
+      "pairs_with": {
+        "wine": ["Champagne", "Gewürztraminer", "Pinot Noir"],
+        "beer": ["Saison", "Belgian tripel"],
+        "extras": ["baguette", "pear slices"]
+      },
+      "monger_note": "TODO_KYLIE",
+      "story": "TODO_KYLIE"
+    },
+    {
+      "id": "humboldt-fog",
+      "name": "Humboldt Fog",
+      "origin": "Humboldt County, California (Cypress Grove)",
+      "milk": "goat",
+      "style": "bloomy",
+      "intensity": 2,
+      "flavor_tags": ["tangy", "citrus", "creamy", "earthy"],
+      "price_tier": "$$",
+      "raw_milk": false,
+      "pairs_with": {
+        "wine": ["Sauvignon Blanc", "Sparkling wine", "Dry rosé"],
+        "beer": ["Saison", "Hefeweizen"],
+        "extras": ["honey", "fig jam", "marcona almonds"]
+      },
+      "monger_note": "TODO_KYLIE",
+      "story": "TODO_KYLIE"
+    },
+    {
+      "id": "mt-tam",
+      "name": "Mt Tam",
+      "origin": "Petaluma, California (Cowgirl Creamery)",
+      "milk": "cow",
+      "style": "bloomy",
+      "intensity": 2,
+      "flavor_tags": ["buttery", "creamy", "mushroomy", "earthy"],
+      "price_tier": "$$",
+      "raw_milk": false,
+      "pairs_with": {
+        "wine": ["Chardonnay", "Sparkling wine", "Pinot Noir"],
+        "beer": ["Pilsner", "Saison"],
+        "extras": ["baguette", "pear slices", "fig jam"]
+      },
+      "monger_note": "TODO_KYLIE",
+      "story": "TODO_KYLIE"
+    },
+    {
+      "id": "point-reyes-original-blue",
+      "name": "Point Reyes Original Blue",
+      "origin": "Point Reyes Station, California (Point Reyes Farmstead)",
+      "milk": "cow",
+      "style": "blue",
+      "intensity": 4,
+      "flavor_tags": ["salty", "tangy", "creamy", "spicy"],
+      "price_tier": "$$",
+      "raw_milk": true,
+      "pairs_with": {
+        "wine": ["Late-harvest Riesling", "Tawny Port", "Zinfandel"],
+        "beer": ["IPA", "Imperial stout", "Barleywine"],
+        "extras": ["honey", "pear slices", "candied walnuts"]
+      },
+      "monger_note": "TODO_KYLIE",
+      "story": "TODO_KYLIE"
+    },
+    {
+      "id": "manchego",
+      "name": "Manchego",
+      "origin": "La Mancha, Spain",
+      "milk": "sheep",
+      "style": "semi-firm",
+      "intensity": 2,
+      "flavor_tags": ["nutty", "buttery", "grassy", "salty"],
+      "price_tier": "$",
+      "raw_milk": null,
+      "pairs_with": {
+        "wine": ["Tempranillo", "Rioja", "Fino Sherry"],
+        "beer": ["Amber lager"],
+        "extras": ["membrillo (quince paste)", "marcona almonds", "green olives"]
+      },
+      "monger_note": "TODO_KYLIE",
+      "story": "TODO_KYLIE"
+    },
+    {
+      "id": "comte",
+      "name": "Comté",
+      "origin": "Jura, France",
+      "milk": "cow",
+      "style": "hard",
+      "intensity": 3,
+      "flavor_tags": ["nutty", "fruity", "buttery", "savory"],
+      "price_tier": "$$",
+      "raw_milk": true,
+      "pairs_with": {
+        "wine": ["Chardonnay", "Vin Jaune", "Dry Riesling"],
+        "beer": ["Belgian blonde", "Pilsner"],
+        "extras": ["walnuts", "apple slices", "cornichons"]
+      },
+      "monger_note": "TODO_KYLIE",
+      "story": "TODO_KYLIE"
+    },
+    {
+      "id": "delice-de-bourgogne",
+      "name": "Délice de Bourgogne",
+      "origin": "Burgundy, France",
+      "milk": "cow",
+      "style": "bloomy",
+      "intensity": 1,
+      "flavor_tags": ["buttery", "creamy", "tangy", "mushroomy"],
+      "price_tier": "$$",
+      "raw_milk": false,
+      "pairs_with": {
+        "wine": ["Champagne", "Chablis", "Sparkling wine"],
+        "beer": ["Belgian witbier"],
+        "extras": ["strawberries", "baguette", "honey"]
+      },
+      "monger_note": "TODO_KYLIE",
+      "story": "TODO_KYLIE"
+    },
+    {
+      "id": "taleggio",
+      "name": "Taleggio",
+      "origin": "Lombardy, Italy",
+      "milk": "cow",
+      "style": "washed",
+      "intensity": 3,
+      "flavor_tags": ["funky", "fruity", "buttery", "meaty"],
+      "price_tier": "$$",
+      "raw_milk": null,
+      "pairs_with": {
+        "wine": ["Barbera", "Nebbiolo", "Franciacorta"],
+        "beer": ["Belgian dubbel", "Saison"],
+        "extras": ["pear slices", "walnut bread", "honey"]
+      },
+      "monger_note": "TODO_KYLIE",
+      "story": "TODO_KYLIE"
+    },
+    {
+      "id": "drunken-goat",
+      "name": "Drunken Goat",
+      "origin": "Murcia, Spain",
+      "milk": "goat",
+      "style": "semi-soft",
+      "intensity": 2,
+      "flavor_tags": ["fruity", "creamy", "sweet", "grassy"],
+      "price_tier": "$",
+      "raw_milk": false,
+      "pairs_with": {
+        "wine": ["Tempranillo", "Garnacha", "Dry rosé"],
+        "beer": ["Amber ale"],
+        "extras": ["marcona almonds", "membrillo (quince paste)", "grapes"]
+      },
+      "monger_note": "TODO_KYLIE",
+      "story": "TODO_KYLIE"
+    },
+    {
+      "id": "parmigiano-reggiano",
+      "name": "Parmigiano Reggiano",
+      "origin": "Emilia-Romagna, Italy",
+      "milk": "cow",
+      "style": "hard",
+      "intensity": 4,
+      "flavor_tags": ["nutty", "salty", "savory", "crystalline"],
+      "price_tier": "$$",
+      "raw_milk": true,
+      "pairs_with": {
+        "wine": ["Lambrusco", "Sangiovese", "Prosecco"],
+        "beer": ["Belgian dubbel", "Brown ale"],
+        "extras": ["aged balsamic", "prosciutto", "dried figs"]
+      },
+      "monger_note": "TODO_KYLIE",
+      "story": "TODO_KYLIE"
+    },
+    {
+      "id": "roquefort",
+      "name": "Roquefort",
+      "origin": "Roquefort-sur-Soulzon, France",
+      "milk": "sheep",
+      "style": "blue",
+      "intensity": 5,
+      "flavor_tags": ["salty", "tangy", "spicy", "creamy"],
+      "price_tier": "$$$",
+      "raw_milk": true,
+      "pairs_with": {
+        "wine": ["Sauternes", "Late-harvest Riesling", "Tawny Port"],
+        "beer": ["Imperial stout"],
+        "extras": ["honey", "walnuts", "pear slices"]
+      },
+      "monger_note": "TODO_KYLIE",
+      "story": "TODO_KYLIE"
+    },
+    {
+      "id": "gruyere",
+      "name": "Gruyère",
+      "origin": "Western Switzerland",
+      "milk": "cow",
+      "style": "hard",
+      "intensity": 3,
+      "flavor_tags": ["nutty", "sweet", "earthy", "fruity"],
+      "price_tier": "$$",
+      "raw_milk": true,
+      "pairs_with": {
+        "wine": ["Pinot Noir", "Chasselas", "Dry Riesling"],
+        "beer": ["Pilsner", "Bock"],
+        "extras": ["apple slices", "cornichons", "walnut bread"]
+      },
+      "monger_note": "TODO_KYLIE",
+      "story": "TODO_KYLIE"
+    }
+  ]
+}
