@@ -6,6 +6,9 @@ It imagines how **The Cellar**, the wine bar and cheese shop at 156 Avenida Del 
 
 I built it as a former cheesemonger. The catalog, pairings, and monger notes come from time spent behind a cheese counter.
 
+**Live on Alpic:** `https://cellar-cheesemonger-0a3ae139.alpic.live/mcp`
+([try it in the playground](https://cellar-cheesemonger-0a3ae139.alpic.live/try))
+
 > **Unofficial demo.** This project is not affiliated with, endorsed by, or connected to The Cellar. Prices are rough planning estimates, not the shop's real prices, and nothing here reflects what is actually in the case.
 
 ## What it does
@@ -47,13 +50,15 @@ Prices per ounce, portion sizes, and board size rules all live in the `CONFIG` b
 3. Create a new project and pick this repository. Alpic detects the FastMCP server from `pyproject.toml` and `main.py`.
 4. Deploy. Alpic gives you a public URL for the server. Copy it.
 
-Every push to the main branch redeploys.
+Prefer the terminal? `npx alpic login` then `npx alpic deploy` does the same thing from the repo folder.
+
+Note: the project pins `fastmcp<4`. FastMCP 4.x negotiates a newer protocol era with Alpic's gateway, and older clients such as MCP Inspector then fail on `logging/setLevel`. FastMCP 3.x works with every client.
 
 ## Connect it to Claude
 
 1. In Claude, open **Settings > Connectors**.
 2. Choose **Add custom connector**.
-3. Name it "The Cellar Cheesemonger" and paste your Alpic URL (the MCP endpoint ends in `/mcp`).
+3. Name it "The Cellar Cheesemonger" and paste the server URL, for example `https://cellar-cheesemonger-0a3ae139.alpic.live/mcp`. No auth is needed.
 4. Start a new chat and turn the connector on from the tools menu.
 
 ## Try these prompts
