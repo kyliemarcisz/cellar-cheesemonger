@@ -13,7 +13,7 @@ from fastmcp import Client
 
 import main
 
-EM_DASH = "—"
+EM_DASH = chr(0x2014)
 
 ROOT = Path(__file__).resolve().parent.parent
 
