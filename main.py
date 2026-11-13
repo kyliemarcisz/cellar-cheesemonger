@@ -388,6 +388,35 @@ def _cost(board: list[dict[str, Any]], oz_each: float) -> float:
     return round(sum(round(price_per_oz(c) * oz_each, 2) for c in board), 2)
 
 
+def spread_picks(board: list[dict[str, Any]], category: str, k: int) -> list[dict[str, Any]]:
+    """Pick up to k drinks that together pair with as many board cheeses as possible.
+
+    Each pick favors cheeses no earlier pick covers, then the drink that pairs with
+    the most cheeses overall, then board order. A broader name covers a narrower
+    one, so "Port" counts for a cheese that lists "Tawny Port".
+    """
+    names: list[str] = []
+    for c in board:
+        for drink in c["pairs_with"][category]:
+            if drink not in names:
+                names.append(drink)
+
+    def covers(drink: str) -> list[dict[str, Any]]:
+        d = norm(drink)
+        return [c for c in board if any(has_phrase(d, norm(e)) for e in c["pairs_with"][category])]
+
+    coverage = {n: covers(n) for n in names}
+    covered: set[str] = set()
+    picks: list[dict[str, Any]] = []
+    while names and len(picks) < k:
+        best = max(names, key=lambda n: (
+            len({c["id"] for c in coverage[n]} - covered), len(coverage[n]), -names.index(n)))
+        names.remove(best)
+        covered |= {c["id"] for c in coverage[best]}
+        picks.append({"name": best, "pairs_with": [c["name"] for c in coverage[best]]})
+    return picks
+
+
 def plan_board(
     guests: int,
     budget_usd: float,
@@ -466,8 +495,6 @@ def plan_board(
     over = total > budget_usd
     board.sort(key=tasting_key)
 
-    wine_counts = Counter(w for c in board for w in c["pairs_with"]["wine"])
-    beer_counts = Counter(b for c in board for b in c["pairs_with"]["beer"])
     staples = norm(" ".join(BOARD_STAPLES))
     extra_counts = Counter(e for c in board for e in c["pairs_with"]["extras"]
                            if not has_phrase(norm(e), staples))
@@ -502,8 +529,8 @@ def plan_board(
              "estimated_cost_usd": round(price_per_oz(c) * oz_each, 2)}
             for i, c in enumerate(board)
         ],
-        "wine_picks": top(wine_counts, 3),
-        "beer_picks": top(beer_counts, 2),
+        "wine_picks": spread_picks(board, "wine", 3),
+        "beer_picks": spread_picks(board, "beer", 2),
         "extras_to_buy": BOARD_STAPLES + [e["name"] for e in top(extra_counts, 4)],
         "plating_tip": PLATING_TIPS[vibe],
         "adjustments": adjustments,

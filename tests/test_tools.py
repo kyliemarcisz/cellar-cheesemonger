@@ -367,3 +367,33 @@ def test_house_favorite_makes_crowd_pleaser_board():
 def test_house_favorite_flag_only_on_favorites():
     flagged = [c["id"] for c in main.CHEESES if main.summary(c).get("house_favorite")]
     assert flagged == main.HOUSE_FAVORITES
+
+
+# ---------------------------------------------------------------- drink picks
+def test_demo_wine_picks_cover_the_whole_board():
+    r = main.plan_board(12, 60, "crowd-pleaser", ["blue cheese"], True)
+    board = {c["name"] for c in r["tasting_order"]}
+    covered = {name for w in r["wine_picks"] for name in w["pairs_with"]}
+    assert covered == board
+    assert len({w["name"] for w in r["wine_picks"]}) == len(r["wine_picks"])
+
+
+@pytest.mark.parametrize("vibe", ["crowd-pleaser", "adventurous", "date-night", "spanish"])
+@pytest.mark.parametrize("guests", [3, 8, 15])
+def test_each_drink_pick_reaches_a_new_cheese(vibe, guests):
+    r = main.plan_board(guests, 500, vibe)
+    board = [c["name"] for c in r["tasting_order"]]
+    for key in ("wine_picks", "beer_picks"):
+        covered: set[str] = set()
+        for pick in r[key]:
+            new = set(pick["pairs_with"]) - covered
+            if covered != set(board):
+                assert new, f"{key}: {pick['name']} adds no new cheese on {board}"
+            covered |= set(pick["pairs_with"])
+
+
+def test_broader_drink_name_covers_specific_one():
+    board = [c for c in main.CHEESES if c["id"] in ("prima-donna", "noord-hollander")]
+    picks = main.spread_picks(board, "wine", 1)
+    assert picks[0]["name"] == "Port"
+    assert set(picks[0]["pairs_with"]) == {"Prima Donna", "Noord Hollander"}
