@@ -22,6 +22,8 @@ I built it as a former cheesemonger. The catalog, pairings, and monger notes com
 
 It also exposes the full catalog as the resource `cellar://cheeses`.
 
+**Pregnancy mode.** With `pregnancy_safe` on, only pasteurized hard or semi-firm cheeses are allowed. Fresh, bloomy, washed, semi-soft, and blue cheeses are out, and so is anything raw or with unconfirmed pasteurization. If that leaves a short board, the server says so and lists the safe picks instead of filling the gap.
+
 All tools are deterministic and return structured JSON. The server does the picking and the math; Claude writes the words.
 
 ## Run it locally
@@ -79,4 +81,4 @@ pyproject.toml   dependencies (managed with uv)
 
 ## Disclaimer
 
-The Cellar Cheesemonger is an independent, unofficial demo created to show what a local cheese shop could look like on the agentic web. It is not affiliated with or endorsed by The Cellar. Cheese details are given in good faith; raw milk status is marked unknown where it varies by producer. If anyone eating is pregnant or has allergies, confirm with the counter.
+The Cellar Cheesemonger is an independent, unofficial demo created to show what a local cheese shop could look like on the agentic web. It is not affiliated with or endorsed by The Cellar. Cheese details are given in good faith; raw milk status is marked unknown where it varies by producer. If anyone eating is pregnant or has allergies, confirm with the counter, and check with a doctor if unsure.

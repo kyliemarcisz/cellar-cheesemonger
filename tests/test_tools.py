@@ -71,11 +71,17 @@ def test_find_cheese_avoid_matches_milk_style_and_name():
         assert "Parmigiano" not in p["name"]
 
 
+PREGNANCY_NOTE = "Pasteurized hard cheeses only. Confirm with the counter, and check with your doctor if unsure."
+
+
 def test_find_cheese_pregnancy_safe():
-    r = main.recommend(["nutty"], 3, pregnancy_safe=True)
-    assert all(p["raw_milk"] is False for p in r["picks"])
-    assert any("confirm with the counter" in n for n in r["notes"])
-    assert {"Comté", "Manchego"} <= set(names(r["excluded"]))
+    r = main.recommend(["creamy", "buttery"], 2, pregnancy_safe=True)
+    assert r["picks"]
+    assert all(p["style"] in ("hard", "semi-firm") and p["raw_milk"] is False for p in r["picks"])
+    assert PREGNANCY_NOTE in r["notes"]
+    # Soft, raw, and unconfirmed cheeses are all out, with reasons.
+    assert {"Comté", "Manchego", "Fromager d'Affinois", "Humboldt Fog", "Drunken Goat"} <= set(names(r["excluded"]))
+    assert all(e["reason"].startswith("pregnancy:") for e in r["excluded"])
 
 
 def test_find_cheese_avoid_everything():
@@ -209,29 +215,84 @@ def test_board_small_pool_says_so():
     assert any("Only 4 cheeses" in a for a in r["adjustments"])
 
 
+SOFT_STYLES = {"fresh", "bloomy", "washed", "semi-soft", "blue"}
+
+
 def test_demo_prompt_sorority_board():
     """12 guests, $60, someone hates blue, one friend is pregnant."""
     r = main.plan_board(12, 60, "crowd-pleaser", avoid=["blue cheese"], pregnancy_safe=True)
     assert r["ok"] and not r["over_budget"]
     board = r["tasting_order"]
-    assert len(board) == 5
-    assert all(c["style"] != "blue" for c in board)
+    ids = {c["id"] for c in board}
+    assert "fromager-daffinois" not in ids and "langres" not in ids
+    assert not any(c["style"] in SOFT_STYLES for c in board)
     assert all(c["raw_milk"] is False for c in board)
     assert r["estimated_total_usd"] <= 60
-    assert any("confirm with the counter" in n for n in r["notes"])
-    assert len(r["wine_picks"]) == 3
+    assert PREGNANCY_NOTE in r["notes"]
+    # The catalog can't fill 5 safe slots, so it must say so instead of padding.
+    assert r["short_board"] is True
+    short = [n for n in r["notes"] if "pregnancy-safe rule" in n]
+    assert short and all(c["name"] in short[0] for c in board)
     assert "baguette" not in r["extras_to_buy"]
 
 
-# ---------------------------------------------------------------- monger_story
-def test_story_all_todo():
-    r = main.pick_story(main.CHEESES)
-    assert r["available"] is False
-    assert "message" in r
+SAFE_CASES = [
+    dict(guests=g, budget_usd=b, vibe=v, avoid=a)
+    for g in (1, 4, 12, 30)
+    for b in (5, 60, 500)
+    for v in ("crowd-pleaser", "adventurous", "date-night", "spanish")
+    for a in (None, ["blue"], ["goat"])
+]
 
 
-def test_story_skips_todo_entries():
+@pytest.mark.parametrize("case", SAFE_CASES)
+def test_every_pregnancy_safe_board_is_hard_and_pasteurized(case):
+    r = main.plan_board(pregnancy_safe=True, **case)
+    assert PREGNANCY_NOTE in r["notes"]
+    for c in r.get("tasting_order", []):
+        assert c["style"] in ("hard", "semi-firm"), c["name"]
+        assert c["raw_milk"] is False, c["name"]
+
+
+@pytest.mark.parametrize("flavors,adv", [(["creamy"], 1), (["funky"], 5), (["nutty", "caramel"], 3), ([], 2)])
+def test_every_pregnancy_safe_pick_is_hard_and_pasteurized(flavors, adv):
+    r = main.recommend(flavors, adv, pregnancy_safe=True)
+    assert PREGNANCY_NOTE in r["notes"]
+    for p in r["picks"]:
+        assert p["style"] in ("hard", "semi-firm") and p["raw_milk"] is False, p["name"]
+
+
+def test_pregnancy_safe_with_nothing_left_never_pads():
+    r = main.plan_board(6, 100, "crowd-pleaser", avoid=["cow"], pregnancy_safe=True)
+    assert r["ok"] is False
+    assert "pasteurized" in r["error"]
+    assert "tasting_order" not in r
+
+
+def test_pregnancy_rule_uses_more_safe_cheeses_when_they_exist():
     cheeses = json.loads(json.dumps(main.CHEESES))
+    for c in cheeses:
+        if c["id"] in ("manchego", "piave", "noord-hollander"):
+            c["raw_milk"] = False
+    r = main.plan_board(12, 60, "crowd-pleaser", ["blue"], True, cheeses=cheeses)
+    assert {c["id"] for c in r["tasting_order"]} == {"prima-donna", "manchego", "piave", "noord-hollander"}
+    assert not any(c["style"] in SOFT_STYLES for c in r["tasting_order"])
+
+
+# ---------------------------------------------------------------- monger_story
+def test_story_none_written_is_friendly():
+    cheeses = json.loads(json.dumps(main.CHEESES))
+    for c in cheeses:
+        c["story"] = ""
+    r = main.pick_story(cheeses)
+    assert r["available"] is False
+    assert "story" not in r and r["message"]
+
+
+def test_story_skips_todo_empty_and_blank_entries():
+    cheeses = json.loads(json.dumps(main.CHEESES))
+    for i, c in enumerate(cheeses):
+        c["story"] = ["", "TODO_KYLIE", "   ", " TODO_KYLIE "][i % 4]
     cheeses[3]["story"] = "The day the Langres crater overflowed."
     for seed in range(10):
         r = main.pick_story(cheeses, random.Random(seed))
@@ -254,7 +315,9 @@ def test_mcp_server_end_to_end():
             assert "cellar://cheeses" in [str(r.uri) for r in resources]
             content = await client.read_resource("cellar://cheeses")
             assert "Lincolnshire Poacher" in content[0].text
-            assert "not affiliated" in (client.initialize_result.instructions or "").lower()
+            instructions = (client.initialize_result.instructions or "").lower()
+            assert "unofficial demo" in instructions
+            assert "not affiliated" in instructions
     asyncio.run(run())
 
 
@@ -273,9 +336,29 @@ def test_no_em_dashes_anywhere():
     assert EM_DASH not in outputs
 
 
+def test_never_speaks_for_the_cellar():
+    """No first-person plural about the shop in data, docs, instructions, or output."""
+    import re
+    first_person = re.compile(r"\b(our|ours|we|we're|we've|us)\b", re.IGNORECASE)
+    texts = {
+        "README.md": (ROOT / "README.md").read_text(encoding="utf-8"),
+        "INSTRUCTIONS": main.INSTRUCTIONS.replace('never as "we" or "our"', ""),
+        "monger notes": " ".join(c["monger_note"] for c in main.CHEESES),
+        "tool output": json.dumps([
+            main.plan_board(12, 60, "crowd-pleaser", ["blue"], True),
+            main.plan_board(6, 100, "crowd-pleaser", ["cow"], True),
+            main.recommend(["nutty"], 3, pregnancy_safe=True),
+            main.pairings_for("honey"), main.pairings_for("kombucha"),
+            main.pick_story(),
+        ]),
+    }
+    for where, text in texts.items():
+        assert not first_person.search(text), f"first person in {where}: {first_person.search(text)}"
+
+
 # ---------------------------------------------------------------- house favorites
 def test_house_favorite_makes_crowd_pleaser_board():
-    r = main.plan_board(12, 60, "crowd-pleaser", avoid=["blue"], pregnancy_safe=True)
+    r = main.plan_board(12, 60, "crowd-pleaser", avoid=["blue"])
     favs = [c for c in r["tasting_order"] if c.get("house_favorite")]
     assert [c["id"] for c in favs] == ["fromager-daffinois"]
     assert not r["over_budget"]

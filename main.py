@@ -60,9 +60,21 @@ TODO_MARKER = "TODO_KYLIE"
 STYLES = ["fresh", "bloomy", "semi-soft", "semi-firm", "hard", "washed", "blue"]
 MILKS = ["cow", "goat", "sheep", "mixed"]
 PREGNANCY_NOTE = (
-    "Filtered to cheeses listed as pasteurized. Producers and batches vary, "
-    "so confirm with the counter before serving anyone who is pregnant."
+    "Pasteurized hard cheeses only. Confirm with the counter, and check with "
+    "your doctor if unsure."
 )
+PREGNANCY_SAFE_STYLES = ("hard", "semi-firm")
+
+
+def is_pregnancy_safe(cheese: dict[str, Any]) -> bool:
+    """Only pasteurized hard or semi-firm cheeses. Unknown pasteurization fails."""
+    return cheese["style"] in PREGNANCY_SAFE_STYLES and cheese["raw_milk"] is False
+
+
+def written(text: str | None) -> str:
+    """Return monger-written text, or "" if it is empty or still a TODO."""
+    text = (text or "").strip()
+    return "" if text == TODO_MARKER else text
 
 # Plain-language words people use, mapped to catalog values.
 AVOID_ALIASES = {
@@ -150,8 +162,8 @@ def summary(cheese: dict[str, Any]) -> dict[str, Any]:
     }
     if cheese["id"] in HOUSE_FAVORITES:
         out["house_favorite"] = True
-    if cheese.get("monger_note") and cheese["monger_note"] != TODO_MARKER:
-        out["monger_note"] = cheese["monger_note"]
+    if written(cheese.get("monger_note")):
+        out["monger_note"] = written(cheese["monger_note"])
     return out
 
 
@@ -193,8 +205,13 @@ def filter_pool(
             reason = f"not {want_milk} milk"
         elif (hit := is_avoided(c, avoid)) is not None:
             reason = f"avoid: {hit}"
-        elif pregnancy_safe and c["raw_milk"] is not False:
-            reason = "raw milk" if c["raw_milk"] else "pasteurization unconfirmed"
+        elif pregnancy_safe and not is_pregnancy_safe(c):
+            if c["style"] not in PREGNANCY_SAFE_STYLES:
+                reason = f"pregnancy: {c['style']} style (hard or semi-firm only)"
+            elif c["raw_milk"]:
+                reason = "pregnancy: raw milk"
+            else:
+                reason = "pregnancy: pasteurization unconfirmed"
         if reason:
             excluded.append({"name": c["name"], "reason": reason})
         else:
@@ -251,6 +268,9 @@ def recommend(
     ]
     if not picks:
         notes.append("Nothing in the case fits those filters. Try loosening the avoid list or milk choice.")
+    elif pregnancy_safe and len(picks) < 3:
+        notes.append(f"Only {len(picks)} cheese(s) pass the pregnancy-safe rule with these filters. "
+                     "Ask the counter which other hard cheeses are pasteurized rather than picking a soft one.")
     return {
         "query": {"flavors": flavors, "adventurousness": adv, "milk": milk,
                   "avoid": avoid or [], "pregnancy_safe": pregnancy_safe},
@@ -386,14 +406,27 @@ def plan_board(
 
     pool, excluded = filter_pool(cheeses, avoid, pregnancy_safe)
     if not pool:
-        return {"ok": False, "error": "Every cheese in the case is ruled out by those filters.",
-                "excluded": excluded}
+        error = "Every cheese in the case is ruled out by those filters."
+        if pregnancy_safe:
+            error += (" No pasteurized hard or semi-firm cheese is left. Ask the counter which hard "
+                      "cheeses are pasteurized rather than adding a soft one.")
+        return {"ok": False, "error": error, "excluded": excluded,
+                "notes": [PREGNANCY_NOTE] if pregnancy_safe else []}
 
     adjustments: list[str] = []
     target = board_size_for(guests)
     board = _pick(pool, target, vibe)
-    if len(board) < target:
+    short_board = len(board) < target
+    short_note = None
+    if short_board:
         adjustments.append(f"Only {len(board)} cheeses fit your filters, so the board has {len(board)} instead of {target}.")
+        if pregnancy_safe:
+            short_note = (
+                f"Only {len(board)} cheese(s) in the case pass the pregnancy-safe rule (pasteurized, hard or "
+                f"semi-firm): {', '.join(c['name'] for c in board)}. A board for {guests} usually has {target}. "
+                "This board uses only the safe picks. Ask the counter which other hard cheeses are "
+                "pasteurized before adding anything else."
+            )
 
     oz_per_guest = OZ_PER_GUEST
     oz_each = _ounces_each(guests, len(board), oz_per_guest)
@@ -447,6 +480,8 @@ def plan_board(
     notes = []
     if pregnancy_safe:
         notes.append(PREGNANCY_NOTE)
+    if short_note:
+        notes.append(short_note)
     if over:
         notes.append(f"Even trimmed down, this board runs about ${total - budget_usd:.2f} over budget. "
                      f"Plan on about ${total:.2f}, or fewer guests.")
@@ -459,6 +494,7 @@ def plan_board(
         "budget_usd": budget_usd,
         "estimated_total_usd": total,
         "over_budget": over,
+        "short_board": short_board,
         "budget_remaining_usd": round(budget_usd - total, 2),
         "ounces_per_guest": round(oz_each * len(board) / guests, 2),
         "tasting_order": [
@@ -481,14 +517,14 @@ def plan_board(
 # ----------------------------------------------------------------------------
 def pick_story(cheeses: list[dict[str, Any]] | None = None, rng: random.Random | None = None) -> dict[str, Any]:
     cheeses = CHEESES if cheeses is None else cheeses
-    ready = [c for c in cheeses if c.get("story") and c["story"].strip() != TODO_MARKER]
+    ready = [c for c in cheeses if written(c.get("story"))]
     if not ready:
         return {"available": False,
-                "message": "The monger hasn't written any stories yet. Check back soon."}
+                "message": "No stories from behind the counter yet. Ask me to pair something or build a board in the meantime."}
     c = (rng or random).choice(ready)
-    out = {"available": True, "cheese": c["name"], "origin": c["origin"], "story": c["story"]}
-    if c.get("monger_note") and c["monger_note"] != TODO_MARKER:
-        out["monger_note"] = c["monger_note"]
+    out = {"available": True, "cheese": c["name"], "origin": c["origin"], "story": written(c["story"])}
+    if written(c.get("monger_note")):
+        out["monger_note"] = written(c["monger_note"])
     return out
 
 
@@ -509,9 +545,15 @@ How to use the tools:
 If anyone is pregnant, pass pregnancy_safe=true. Put dislikes in avoid.
 - monger_story: a story from behind the counter.
 
+Pregnancy: pregnancy_safe keeps only pasteurized hard or semi-firm cheeses. \
+If that leaves a short board, say so plainly and name the safe picks. Never \
+suggest soft, blue, raw-milk, or unconfirmed cheeses to fill the gap.
+
 The tools return structured data. Write the answer in a warm, knowledgeable \
 cheesemonger voice, present boards in tasting order (mild to strong), mention any \
-cheese marked house_favorite, and always pass along any notes about pregnancy or budget. Avoid em dashes."""
+cheese marked house_favorite, and always pass along any notes about pregnancy or budget. \
+Refer to The Cellar in the third person ("The Cellar's lavender caramel"), never \
+as "we" or "our", since this demo does not speak for the shop. Avoid em dashes."""
 
 mcp = FastMCP("The Cellar Cheesemonger", instructions=INSTRUCTIONS)
 
@@ -524,7 +566,7 @@ def find_cheese(
     adventurousness: Annotated[int, Field(ge=1, le=5, description="1 = play it safe, 5 = bring me the stinkiest thing you have")],
     milk: Annotated[str | None, Field(description="Only this milk: cow, goat, sheep, or mixed")] = None,
     avoid: Annotated[list[str] | None, Field(description="Things to rule out: a milk ('goat'), a style ('blue'), a flavor ('funky'), or a cheese name")] = None,
-    pregnancy_safe: Annotated[bool, Field(description="Only cheeses listed as pasteurized")] = False,
+    pregnancy_safe: Annotated[bool, Field(description="Set true if the person is pregnant; keeps only pasteurized hard or semi-firm cheeses")] = False,
 ) -> dict:
     """Recommend the top 3 cheeses for someone's taste, with reasons for each pick."""
     return recommend(flavors, adventurousness, milk, avoid, pregnancy_safe)
@@ -544,7 +586,7 @@ def build_board(
     budget_usd: Annotated[float, Field(description="Total cheese budget in US dollars")],
     vibe: Annotated[VIBES, Field(description="crowd-pleaser, adventurous, date-night, or spanish")] = "crowd-pleaser",
     avoid: Annotated[list[str] | None, Field(description="Things to rule out: a milk, a style ('blue'), a flavor, or a cheese name")] = None,
-    pregnancy_safe: Annotated[bool, Field(description="Set true if anyone eating is pregnant; keeps only cheeses listed as pasteurized")] = False,
+    pregnancy_safe: Annotated[bool, Field(description="Set true if anyone eating is pregnant; keeps only pasteurized hard or semi-firm cheeses")] = False,
 ) -> dict:
     """Build a cheese board in tasting order with ounces, estimated cost, wine and beer picks, extras, and a plating tip. Trims to fit the budget and explains any changes."""
     return plan_board(guests, budget_usd, vibe, avoid, pregnancy_safe)
