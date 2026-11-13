@@ -397,3 +397,11 @@ def test_broader_drink_name_covers_specific_one():
     picks = main.spread_picks(board, "wine", 1)
     assert picks[0]["name"] == "Port"
     assert set(picks[0]["pairs_with"]) == {"Prima Donna", "Noord Hollander"}
+
+
+# ---------------------------------------------------------------- server instructions
+def test_instructions_carry_exact_pregnancy_note_and_answer_rules():
+    text = " ".join(main.INSTRUCTIONS.split())
+    assert main.PREGNANCY_NOTE in text
+    assert "as returned" in text and "do not change portions" in text
+    assert "Never mention the server" in text
