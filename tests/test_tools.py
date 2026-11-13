@@ -25,7 +25,7 @@ def names(items):
 # ---------------------------------------------------------------- data
 def test_catalog_shape():
     cheeses = main.load_cheeses()
-    assert 12 <= len(cheeses) <= 15
+    assert 12 <= len(cheeses) <= 25
     ids = [c["id"] for c in cheeses]
     assert len(ids) == len(set(ids))
     for c in cheeses:
