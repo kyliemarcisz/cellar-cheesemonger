@@ -15,16 +15,35 @@ I built it as a former cheesemonger. The catalog, pairings, and monger notes com
 
 | Tool | What you give it | What you get back |
 | --- | --- | --- |
-| `find_cheese` | flavors you like, adventurousness 1 to 5, optional milk, things to avoid, pregnancy-safe flag | top 3 picks, each with a score and the reasons it was picked |
+| `find_cheese` | flavors you like, adventurousness 1 to 5, optional milk, things to avoid, [`pregnancy_safe`](#pregnancy-safe-mode) | top 3 picks, each with a score and the reasons it was picked |
 | `pair` | a cheese, a drink, or a snack ("Comté", "pinot noir", "IPA", "honey", "red wine") | the cheese's pairings, or every cheese that goes with the drink |
-| `build_board` | guests, budget, vibe (`crowd-pleaser`, `adventurous`, `date-night`, `spanish`), avoid list, pregnancy-safe flag | 3 to 5 cheeses in tasting order, ounces each, estimated cost, wine and beer picks, extras, plating tip, and any budget trade-offs |
+| `build_board` | guests, budget, vibe (`crowd-pleaser`, `adventurous`, `date-night`, `spanish`), avoid list, [`pregnancy_safe`](#pregnancy-safe-mode) | 3 to 5 cheeses in tasting order, ounces each, estimated cost, wine and beer picks, extras, plating tip, and any budget trade-offs |
 | `monger_story` | nothing | a story from behind the counter |
 
 It also exposes the full catalog as the resource `cellar://cheeses`.
 
-**Pregnancy mode.** With `pregnancy_safe` on, only pasteurized hard or semi-firm cheeses are allowed. Fresh, bloomy, washed, semi-soft, and blue cheeses are out, and so is anything raw or with unconfirmed pasteurization. If that leaves a short board, the server says so and lists the safe picks instead of filling the gap.
-
 All tools are deterministic and return structured JSON. The server does the picking and the math; Claude writes the words.
+
+## Pregnancy-safe mode
+
+`find_cheese` and `build_board` take a `pregnancy_safe` flag. Claude sets it whenever someone eating is pregnant. With it on, a cheese has to pass **both** checks:
+
+| Check | Allowed | Excluded |
+| --- | --- | --- |
+| Style | hard, semi-firm | fresh, bloomy, washed, semi-soft, blue |
+| Milk | `raw_milk: false` (pasteurized) | `raw_milk: true` (raw) or `null` (unconfirmed) |
+
+Unconfirmed counts as unsafe. A cheese only qualifies once its pasteurization is known.
+
+**Every pregnancy-safe response carries this note:**
+
+> Pasteurized hard cheeses only. Confirm with the counter, and check with your doctor if unsure.
+
+**Short boards are reported, never padded.** If too few cheeses pass for the party size, `build_board` returns the safe picks it has, sets `short_board: true`, and says plainly how many passed and which ones. It never fills the gap with a soft or unconfirmed cheese. If nothing passes at all, it returns an error that says so. Every excluded cheese is listed with its reason (for example, `pregnancy: bloomy style (hard or semi-firm only)`).
+
+In the current catalog, four cheeses qualify: Manchego, Prima Donna, Piave, and Noord Hollander. For the sorority prompt below, that means a four-cheese board instead of the usual five. The response says why and still covers every cheese with a wine pick.
+
+The test suite enforces all of this. It checks 144 combinations of party size, budget, vibe, and avoid list, plus a range of `find_cheese` queries, and fails if any pregnancy-safe result contains a cheese that isn't pasteurized and hard or semi-firm.
 
 ## Run it locally
 
@@ -81,4 +100,4 @@ pyproject.toml   dependencies (managed with uv)
 
 ## Disclaimer
 
-The Cellar Cheesemonger is an independent, unofficial demo created to show what a local cheese shop could look like on the agentic web. It is not affiliated with or endorsed by The Cellar. Cheese details are given in good faith; raw milk status is marked unknown where it varies by producer. If anyone eating is pregnant or has allergies, confirm with the counter, and check with a doctor if unsure.
+The Cellar Cheesemonger is an independent, unofficial demo created to show what a local cheese shop could look like on the agentic web. It is not affiliated with or endorsed by The Cellar. Cheese details are given in good faith; raw milk status is marked unknown where it varies by producer, and unknown is treated as unsafe in pregnancy-safe mode. This is not medical advice. If anyone eating is pregnant or has allergies, confirm with the counter, and check with a doctor if unsure.
