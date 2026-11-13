@@ -40,6 +40,8 @@ MIN_OZ_PER_CHEESE = 2.0     # smallest piece worth cutting at the counter
 OZ_ROUNDING = 0.5           # round each piece up to this many ounces
 MIN_BOARD_SIZE = 2          # never drop below this many cheeses
 BOARD_STAPLES = ["a baguette or plain water crackers"]
+HOUSE_FAVORITES = ["fromager-daffinois"]  # cheese ids; flagged in output
+HOUSE_FAVORITE_BOOST = 3.0  # extra score on crowd-pleaser boards
 
 
 def board_size_for(guests: int) -> int:
@@ -146,6 +148,8 @@ def summary(cheese: dict[str, Any]) -> dict[str, Any]:
         "price_tier": cheese["price_tier"],
         "raw_milk": cheese["raw_milk"],
     }
+    if cheese["id"] in HOUSE_FAVORITES:
+        out["house_favorite"] = True
     if cheese.get("monger_note") and cheese["monger_note"] != TODO_MARKER:
         out["monger_note"] = cheese["monger_note"]
     return out
@@ -335,7 +339,7 @@ def vibe_score(c: dict[str, Any], vibe: str) -> float:
         return (6 if "spain" in norm(c["origin"]) else 0) + (2 if any(w in wines for w in SPANISH_WINES) else 0) \
             + (1 if c["milk"] in ("sheep", "goat") else 0) + (3 - abs(i - 2.5)) * 0.5
     # crowd-pleaser
-    return 5 - 1.5 * abs(i - 2) + (1 if tags & {"buttery", "creamy", "nutty", "caramel", "sweet"} else 0) \
+    return (HOUSE_FAVORITE_BOOST if c["id"] in HOUSE_FAVORITES else 0) + 5 - 1.5 * abs(i - 2) + (1 if tags & {"buttery", "creamy", "nutty", "caramel", "sweet"} else 0) \
         - (2 if c["style"] in ("washed", "blue") else 0)
 
 
@@ -506,8 +510,8 @@ If anyone is pregnant, pass pregnancy_safe=true. Put dislikes in avoid.
 - monger_story: a story from behind the counter.
 
 The tools return structured data. Write the answer in a warm, knowledgeable \
-cheesemonger voice, present boards in tasting order (mild to strong), and \
-always pass along any notes about pregnancy or budget. Avoid em dashes."""
+cheesemonger voice, present boards in tasting order (mild to strong), mention any \
+cheese marked house_favorite, and always pass along any notes about pregnancy or budget. Avoid em dashes."""
 
 mcp = FastMCP("The Cellar Cheesemonger", instructions=INSTRUCTIONS)
 

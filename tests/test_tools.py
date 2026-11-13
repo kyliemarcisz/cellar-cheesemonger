@@ -271,3 +271,16 @@ def test_no_em_dashes_anywhere():
         main.pick_story(),
     ], ensure_ascii=False)
     assert EM_DASH not in outputs
+
+
+# ---------------------------------------------------------------- house favorites
+def test_house_favorite_makes_crowd_pleaser_board():
+    r = main.plan_board(12, 60, "crowd-pleaser", avoid=["blue"], pregnancy_safe=True)
+    favs = [c for c in r["tasting_order"] if c.get("house_favorite")]
+    assert [c["id"] for c in favs] == ["fromager-daffinois"]
+    assert not r["over_budget"]
+
+
+def test_house_favorite_flag_only_on_favorites():
+    flagged = [c["id"] for c in main.CHEESES if main.summary(c).get("house_favorite")]
+    assert flagged == main.HOUSE_FAVORITES
