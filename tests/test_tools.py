@@ -80,7 +80,7 @@ def test_find_cheese_pregnancy_safe():
     assert all(p["style"] in ("hard", "semi-firm") and p["raw_milk"] is False for p in r["picks"])
     assert PREGNANCY_NOTE in r["notes"]
     # Soft, raw, and unconfirmed cheeses are all out, with reasons.
-    assert {"Comté", "Manchego", "Fromager d'Affinois", "Humboldt Fog", "Drunken Goat"} <= set(names(r["excluded"]))
+    assert {"Comté", "Fromager d'Affinois", "Humboldt Fog", "Drunken Goat"} <= set(names(r["excluded"]))
     assert all(e["reason"].startswith("pregnancy:") for e in r["excluded"])
 
 
@@ -263,7 +263,7 @@ def test_every_pregnancy_safe_pick_is_hard_and_pasteurized(flavors, adv):
 
 
 def test_pregnancy_safe_with_nothing_left_never_pads():
-    r = main.plan_board(6, 100, "crowd-pleaser", avoid=["cow"], pregnancy_safe=True)
+    r = main.plan_board(6, 100, "crowd-pleaser", avoid=["cow", "sheep"], pregnancy_safe=True)
     assert r["ok"] is False
     assert "pasteurized" in r["error"]
     assert "tasting_order" not in r

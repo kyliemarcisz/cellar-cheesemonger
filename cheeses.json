@@ -230,7 +230,7 @@
         "salty"
       ],
       "price_tier": "$",
-      "raw_milk": null,
+      "raw_milk": false,
       "pairs_with": {
         "wine": [
           "Tempranillo",
@@ -513,7 +513,7 @@
         ]
       },
       "monger_note": "The Cellar's most popular cheese, and for good reason. Get it with raw wildflower honey and Marcona almonds.",
-      "story": ""
+      "story": "Daff was my go-to cheese to slab between bread and honey on a break shift at The Cellar. My coworkers and I loved putting it on boards, because everyone loves it, even the picky cheese people."
     },
     {
       "id": "blumenkase",
@@ -542,7 +542,7 @@
         ]
       },
       "monger_note": "My personal favorite. The rind is covered in real flowers, and it's best with The Cellar's house-made lavender caramel.",
-      "story": ""
+      "story": "Blumenkäse is my personal favorite. I love how you can eat every part of the cheese, flowers and all, and it's not something you'd find at a grocery store."
     },
     {
       "id": "noord-hollander",
@@ -558,7 +558,7 @@
         "crunchy"
       ],
       "price_tier": "$$",
-      "raw_milk": null,
+      "raw_milk": false,
       "pairs_with": {
         "wine": [
           "Cabernet Sauvignon",
@@ -572,7 +572,7 @@
         ]
       },
       "monger_note": "Aged gouda with crunchy little crystals. The other perfect match for The Cellar's lavender caramel.",
-      "story": ""
+      "story": "Noord Hollander is the cheese I'd recommend as dessert. Those crunchy little crystals and its caramel and butterscotch flavor make it the perfect way to end a board."
     },
     {
       "id": "piave",
@@ -588,7 +588,7 @@
         "salty"
       ],
       "price_tier": "$$",
-      "raw_milk": null,
+      "raw_milk": false,
       "pairs_with": {
         "wine": [
           "Prosecco",
@@ -603,7 +603,7 @@
         ]
       },
       "monger_note": "The perfect summer cheese. Think parm, but with a sweet note of pineapple.",
-      "story": ""
+      "story": "Piave surprises people with its fruit-forward notes. It's the cheese that ties a whole cheese board together."
     }
   ]
 }
