@@ -422,3 +422,12 @@ def test_light_portion_rule_matches_trimmed_board():
     r = main.plan_board(10, 5, "date-night")
     assert any("portions" in a for a in r["adjustments"])
     assert f"{main.LIGHT_OZ_PER_GUEST:g} oz per guest" in " ".join(r["presentation_rules"])
+
+
+def test_pregnancy_only_raised_when_customer_raises_it():
+    plain = " ".join(main.plan_board(12, 60, "crowd-pleaser", ["blue"])["presentation_rules"])
+    assert "Do not bring up pregnancy" in plain
+    assert "pregnancy_safe=true" in plain  # tells the model how to switch modes later
+    safe = main.plan_board(12, 60, "crowd-pleaser", ["blue"], True)
+    assert "Do not bring up pregnancy" not in " ".join(safe["presentation_rules"])
+    assert main.PREGNANCY_NOTE in safe["notes"]

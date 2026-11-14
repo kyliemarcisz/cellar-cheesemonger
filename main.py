@@ -524,6 +524,11 @@ def plan_board(
         f"Recommend every wine pick ({wine_names}). Each one covers a different cheese on the board.",
         "Speak as the cheesemonger. Do not mention a server, tool, plan, defaults, or data.",
     ]
+    if not pregnancy_safe:
+        presentation_rules.append(
+            "The customer did not mention pregnancy. Do not bring up pregnancy or raw-milk health "
+            "notes. If they mention it later, call build_board again with pregnancy_safe=true."
+        )
 
     return {
         "ok": True,
